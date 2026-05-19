@@ -1,0 +1,286 @@
+# Sets Title
+title = "basic decrypter"
+
+import random
+
+#Sets Variables
+click_count = 0
+easy_number = ""
+easy_words = ""
+word_chosen = ""
+splitword = ""
+wordlenght = ""
+word_ui = ""
+guess1 = ""
+letter1 = "" 
+correct_letter = ""
+alphabet = ""
+scramble_word = ""
+padx = ""
+chosen = ""
+final_guess = ""
+win_msg = ""
+lose_msg = ""
+
+
+
+
+#Function which happens when enter button is pressed
+def play():
+    global current_try , button_letters, scramble_word , click_count,easy_number , easy_words, word_chosen , splitword , wordlenght , word_ui ,guess1 , letter1 , alphabet , correct_letter , padx, my_buttons, press_btn
+    
+    # Creates lists and the variable for current button pressed
+    my_buttons = []
+    button_letters = []
+    current_try = 0
+
+
+    click_count += 1
+
+    #Checks if the enter button has been clicked
+    if click_count >= 1:
+
+
+        # Removes previous UI and resets click count
+        bg_lbl.place_forget()
+        play_btn.pack_forget()
+        title_lbl.pack_forget()
+        click_count = 0
+
+        # Creates a list of words and Generates a random number to choose a random word
+        easy_number = random.randint ( 0 , 39)
+        easy_words = [ "CORE" , "DATA" , "GRID" , "LINK" , "NODE" , "PORT" , "ROUT" , "SYNC" , "COMS" , "GATE" 
+                       ,"FIRE", "WALL", "BYTE", "BITS", "CODE", "HASH", "KEYS", "LOCK", "PASS", "WORD", "CYPHER", 
+                       "MATRIX", "VECTOR", "KERNEL", "BINARY", "SOURCE", "BUFFER", "PACKET", "SOCKET", "SERVER",
+                       "TERMINAL", "COMPILER", "PROTOCOL", "FIRMWARE", "DATABASE", "REGISTRY", "OVERFLOW", "BACKDOOR", 
+                       "MAINWARN", "CRITICAL" ]  
+        
+        #Chooses the random word 
+        word_chosen = easy_words[easy_number]
+        #Splits the word letter by letter
+        splitword = list(word_chosen)
+        #Shows how many letters there are in the word
+        wordlenght = len(word_chosen)
+        #Sets the ui for where the blank spaces will be depending on the lenght of the word
+        word_ui = [ " _______ " ] * wordlenght
+        
+        
+        # Changes the order of the letters
+        random.shuffle(splitword)
+       #print(scramble_word)      <- used for testing
+
+        
+        #Checks how long the word is to create the number of buttons needed
+        for i in range(wordlenght):
+            
+            #Chooses a random letter from the word chosen depending on the number of letters
+            letter1 = random.randint(0 , len(splitword) -1 )
+            # Deletes the letter once chosen
+            guess1 = splitword.pop(letter1)
+
+            #Creates a new button for every letter created
+            new_btn = Button(
+                btn_holder,
+                text = guess1,
+                width = 8,
+                height = 5,
+                # helps confirm the button pressed
+                command = lambda x=i: pressed(x)
+            )
+
+            # Sets the distance between each button depending on its position 
+            if i == wordlenght - 1:
+                padx = (50)
+            else:
+                padx = (0 , 50)
+            new_btn.pack( anchor= "center" , side = "right" , padx = padx , pady = 150)
+
+            # Adds the button created to a list (my_buttons)
+            my_buttons.append(new_btn)
+            # Adds the letter chosen to list ( button letters )
+            button_letters.append(guess1)
+        
+
+        # Places the UI
+        word_frame.pack(fill = 'x', )
+        word_lbl.pack()
+        word_lbl.config(
+            # Joins the blank spaces without brackets
+            text = " ".join(word_ui)
+        )
+        btn_holder.pack()
+        guess_frame.pack(fill = "both", expand = True, pady = 20 )
+
+
+
+
+# Creates function for when one of the buttons are chosen
+def pressed(a):
+    global current_try , my_buttons, word_ui , word_lbl , chosen , button_letters , final_guess , win_msg , lose_msg , press_btn
+
+
+    # checks if current try is less than  the number of blank spaces
+    if current_try < len(word_ui):
+
+
+        # Sets the blank spaces as the letter clicked in ascending order
+        chosen = button_letters[a]
+        word_ui[current_try] = chosen 
+
+        # Disables a button if it is pressed
+        my_buttons[a].config(
+            state = DISABLED
+        )
+
+
+        current_try += 1
+        
+        #updates the text so that the words are joined together as 1 instead of individual strings
+        updated_text = " ".join(word_ui)
+        word_lbl.config(text=updated_text)
+
+    #Checks if the number of buttons pressed is equal to the number of letters in the chosen
+    if current_try == len(word_chosen):
+        #sets the final guess as t
+        updated_text = "".join(word_ui)
+
+        #checks if the final text is the same as the word chosen
+        if updated_text == word_chosen:
+            
+            #Creates win msg
+            win_msg =  f"Congratulations, You managed to decrypt the word {word_chosen}"
+
+            #Removes the button frame
+            btn_holder.pack_forget() 
+
+            # Updates and shows UI if user wins
+            win_lbl.config(
+                text=win_msg
+                )
+            win_lbl.pack()
+            playagn_btn.pack( pady = 150)
+
+        else:  
+            # Creates Lose message
+            lose_msg = f" You failed to decrypt the secret word {word_chosen}"
+            # Removes the button frame
+            btn_holder.pack_forget() 
+
+            # Updates and shows UI if user loses
+            lose_lbl.config(
+                text= lose_msg
+            )
+            lose_lbl.pack()
+            playagn_btn.pack( pady = 150)
+
+# Creates function for play again button
+def playagn():
+    global click_count
+    
+    # Resets UI
+    click_count = 1
+    lose_lbl.pack_forget()
+    win_lbl.pack_forget()
+    playagn_btn.pack_forget()
+    btn_holder.pack_forget()
+    
+    #Deletes the previous buttons
+    for b in (my_buttons):
+        b.destroy()
+    # Returns to play function
+    play()
+
+
+# Creates window
+from tkinter import *
+my_window = Tk()
+my_window.attributes('-fullscreen', True)
+my_window.resizable(True, True)
+my_window.title("Basic decrypter")
+
+# Creates Background
+bg_img = PhotoImage(file= "decryptor.png")
+bg_lbl = Label(
+    my_window,
+    image = bg_img
+)
+bg_lbl.place(x=0, y=0, relwidth=1, relheight=1)
+
+
+#Creates title label
+title_lbl = Label(
+    text = "Decryptor",
+    fg = "black",
+    bg = "DeepSkyBlue",
+    height = 3,
+    width = 30,
+    font = ("Courier" , 25 , "bold")
+)
+
+# Creates play Button
+play_btn = Button(
+    my_window,
+    text = " Play",
+    width = 30,
+    height = 2,
+    command = play
+)
+
+# Creates word frame
+word_frame = Frame(
+    my_window,
+    bd = 10,
+    pady = 180,
+    relief = "groove",
+)
+
+# Creates Word label
+word_lbl = Label(
+    word_frame,
+    text = word_ui,
+    font = ("Courier", 30, "bold"),
+)
+
+# Creates guess frame
+guess_frame = Frame(  
+    my_window,
+    relief = "groove",
+)
+
+# Creates Button holder
+btn_holder = Frame(
+    guess_frame,
+    width = 8,
+    height = 5,
+)
+
+# Creates win label
+win_lbl = Label(
+    guess_frame,
+    text = win_msg,
+    font = ("Courier", 30, "bold"),
+)
+
+# Creates Lose label
+lose_lbl = Label(
+    guess_frame,
+    text = lose_msg,
+    font = ("Courier", 30, "bold"),
+)
+
+# Creates play again button
+playagn_btn = Button(
+    guess_frame,
+    text = " Play Again",
+    width = 30,
+    height = 2,
+    command = playagn
+)
+
+# Packs UI
+title_lbl.pack( pady = (150 , 0) , expand = TRUE)
+play_btn.pack( pady = (100 , 400) , expand = TRUE)
+
+
+# Keeps game Updated
+my_window.mainloop()
